@@ -1,6 +1,7 @@
 ﻿using BookInformationAggregatorAPI.Models;
 using BookInformationAggregatorAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
 
 namespace BookInformationAggregatorAPI.Controllers
 {
@@ -25,23 +26,13 @@ namespace BookInformationAggregatorAPI.Controllers
             return Ok(_bookService.GetAllBooks());
         }
 
-        // GET /books/{id}
-        // Returns a book by its ID
-        [HttpGet("{id}")]
-        public ActionResult<Book> GetBookById(string id)
-        {
-            var book = _bookService.GetBookById(id);
-            if (book == null) return NotFound();
-            return Ok(book);
-        }
-
         // POST /books
         // Adds a new book to the collection
         [HttpPost]
         public IActionResult AddBook([FromBody] Book newBook)
         {
             _bookService.AddBook(newBook);
-            return CreatedAtAction(nameof(GetBookById), new { id = newBook.Id }, newBook);
+            return Created($"/books/{newBook.Id}", newBook);
         }
 
         // DELETE /books/{id}
@@ -53,6 +44,34 @@ namespace BookInformationAggregatorAPI.Controllers
             if (!result) return NotFound(new { message = "Book not found" });
 
             return NoContent();
+        }
+
+        #endregion
+
+        #region Endpoints for External API Operations
+
+        // GET /books/search?query={query}
+        // Searches for books by title or author
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<BookSearch>>> SearchBooks([FromQuery] string query)
+        {
+            if (string.IsNullOrEmpty(query))
+                return BadRequest(new { message = "Query parameter is required" });
+
+            var books = await _bookService.SearchBooksAsync(query);
+            return Ok(books);
+        }
+
+        // GET /books/{id}
+        // Fetches detailed information about a book by its Open Library ID
+        [HttpGet("{id}")]
+        public async Task<ActionResult<OpenLibraryBookDetail>> GetBookDetails(string id)
+        {
+            var bookDetail = await _bookService.GetOpenLibraryBookDetailAsync(id);
+            if (bookDetail == null)
+                return NotFound(new { message = "Book not found in external API" });
+
+            return Ok(bookDetail);
         }
 
         #endregion

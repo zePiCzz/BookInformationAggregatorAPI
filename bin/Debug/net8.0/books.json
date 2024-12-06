@@ -19,12 +19,5 @@
     "author": "Herman Melville",
     "description": "The narrative of Captain Ahab\u0027s obsessive quest to kill the white whale, Moby Dick.",
     "published_year": 1851
-  },
-  {
-    "id": "4",
-    "title": "The Last Wish",
-    "author": "Andrzej Sapkowski",
-    "description": "The Last Wish is the first collection of short stories in The Witcher series, introducing Geralt of Rivia and his adventures in a world filled with magic, monsters, and political intrigue.",
-    "published_year": 1993
   }
 ]
