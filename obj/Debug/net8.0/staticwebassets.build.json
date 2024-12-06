@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "TtOFnQJfvlBmiMO4BgKuANH0wUxge8HPfY5BXcCLGQo=",
+  "Source": "BookInformationAggregatorAPI",
+  "BasePath": "_content/BookInformationAggregatorAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
