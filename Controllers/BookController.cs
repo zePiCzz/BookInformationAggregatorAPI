@@ -15,12 +15,18 @@ namespace BookInformationAggregatorAPI.Controllers
             _bookService = bookService;
         }
 
+        #region Endpoints for Local Data
+
+        // GET /books
+        // Returns all books
         [HttpGet]
         public ActionResult<IEnumerable<Book>> GetAllBooks()
         {
             return Ok(_bookService.GetAllBooks());
         }
 
+        // GET /books/{id}
+        // Returns a book by its ID
         [HttpGet("{id}")]
         public ActionResult<Book> GetBookById(string id)
         {
@@ -29,6 +35,8 @@ namespace BookInformationAggregatorAPI.Controllers
             return Ok(book);
         }
 
+        // POST /books
+        // Adds a new book to the collection
         [HttpPost]
         public IActionResult AddBook([FromBody] Book newBook)
         {
@@ -36,14 +44,17 @@ namespace BookInformationAggregatorAPI.Controllers
             return CreatedAtAction(nameof(GetBookById), new { id = newBook.Id }, newBook);
         }
 
+        // DELETE /books/{id}
+        // Deletes a book by its ID
         [HttpDelete("{id}")]
         public IActionResult DeleteBook(string id)
         {
             var result = _bookService.DeleteBook(id);
             if (!result) return NotFound(new { message = "Book not found" });
 
-            return NoContent(); // Return 204 if the deletion is successful
+            return NoContent();
         }
 
+        #endregion
     }
 }

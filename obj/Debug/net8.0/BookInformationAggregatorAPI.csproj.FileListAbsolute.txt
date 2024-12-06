@@ -34,3 +34,5 @@ C:\Users\danie\Desktop\BookInformationAggregator\BookInformationAggregatorAPI\Bo
 C:\Users\danie\Desktop\BookInformationAggregator\BookInformationAggregatorAPI\BookInformationAggregatorAPI\obj\Debug\net8.0\BookInformationAggregatorAPI.pdb
 C:\Users\danie\Desktop\BookInformationAggregator\BookInformationAggregatorAPI\BookInformationAggregatorAPI\obj\Debug\net8.0\BookInformationAggregatorAPI.genruntimeconfig.cache
 C:\Users\danie\Desktop\BookInformationAggregator\BookInformationAggregatorAPI\BookInformationAggregatorAPI\obj\Debug\net8.0\ref\BookInformationAggregatorAPI.dll
+C:\Users\danie\Desktop\BookInformationAggregator\BookInformationAggregatorAPI\BookInformationAggregatorAPI\obj\Debug\net8.0\BookInformationAggregatorAPI.sourcelink.json
+C:\Users\danie\Desktop\BookInformationAggregator\BookInformationAggregatorAPI\BookInformationAggregatorAPI\bin\Debug\net8.0\Newtonsoft.Json.dll
