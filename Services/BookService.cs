@@ -85,45 +85,52 @@ namespace BookInformationAggregatorAPI.Services
                 Id = d.Key.Replace("/works/", ""),
                 Title = d.Title,
                 Author = string.Join(", ", d.AuthorName ?? Array.Empty<string>()),
-                PublishedYear = d.FirstPublishYear ?? 0
+                PublishedYear = d.FirstPublishYear ?? 0,
+                EditionKeys = d.EditionKeys
             }) ?? Enumerable.Empty<BookSearch>();
         }
 
-        // Fetches detailed information about a book by its Open Library ID
+        // Fetches detailed information about a book by its Open Library ID (key)
         public async Task<OpenLibraryBookDetail?> GetOpenLibraryBookDetailAsync(string id)
         {
             try
             {
-                var url = $"https://openlibrary.org/works/{id}.json";
-                var response = await _httpClient.GetStringAsync(url);
+                // Fetch details from /works/{id}
+                var workUrl = $"https://openlibrary.org/works/{id}.json";
+                Console.WriteLine($"Fetching work details for ID: {id} from {workUrl}");
 
-                var bookDetail = JsonSerializer.Deserialize<OpenLibraryBookDetail>(response);
+                var workResponse = await _httpClient.GetAsync(workUrl);
 
-                if (bookDetail == null) return null;
-
-                // Fetch author names dynamically
-                if (bookDetail.Authors != null)
+                if (workResponse.IsSuccessStatusCode)
                 {
-                    foreach (var author in bookDetail.Authors)
+                    var workContent = await workResponse.Content.ReadAsStringAsync();
+                    var workDetail = JsonSerializer.Deserialize<OpenLibraryBookDetail>(workContent, new JsonSerializerOptions
                     {
-                        var authorUrl = $"https://openlibrary.org{author.Author.Key}.json";
-                        var authorResponse = await _httpClient.GetStringAsync(authorUrl);
-                        var authorDetail = JsonSerializer.Deserialize<OpenLibraryAuthorDetail>(authorResponse);
+                        PropertyNameCaseInsensitive = true
+                    });
 
-                        author.Author.Key = authorDetail?.Key.Split('/').Last(); // Update to author name
+                    if (workDetail != null)
+                    {
+                        // Handle missing or partial data
+                        workDetail.Title ??= "Title not available";
+                        workDetail.Description ??= new OpenLibraryDescription { Value = "No description available" };
+                        workDetail.Authors ??= new List<OpenLibraryAuthor>();
+                        return workDetail;
                     }
                 }
+                else
+                {
+                    Console.WriteLine($"Failed to fetch work details for ID: {id}. Status Code: {workResponse.StatusCode}");
+                }
 
-                return bookDetail;
+                return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Handle errors gracefully
+                Console.WriteLine($"Error fetching book details for ID {id}: {ex.Message}");
                 return null;
             }
         }
-
-
         #endregion
     }
 }

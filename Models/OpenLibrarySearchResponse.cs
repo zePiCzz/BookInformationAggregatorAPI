@@ -21,5 +21,9 @@ namespace BookInformationAggregatorAPI.Models
 
         [JsonPropertyName("first_publish_year")]
         public int? FirstPublishYear { get; set; }
+
+        [JsonPropertyName("edition_key")]
+        public List<string> EditionKeys { get; set; }
+
     }
 }

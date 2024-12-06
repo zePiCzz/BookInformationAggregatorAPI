@@ -67,13 +67,19 @@ namespace BookInformationAggregatorAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<OpenLibraryBookDetail>> GetBookDetails(string id)
         {
-            var bookDetail = await _bookService.GetOpenLibraryBookDetailAsync(id);
-            if (bookDetail == null)
-                return NotFound(new { message = "Book not found in external API" });
+            Console.WriteLine($"Fetching book details for ID: {id}");
 
+            var bookDetail = await _bookService.GetOpenLibraryBookDetailAsync(id);
+
+            if (bookDetail == null)
+            {
+                Console.WriteLine($"Book details not found for ID: {id}");
+                return NotFound(new { message = $"Book with ID {id} not found." });
+            }
+
+            Console.WriteLine($"Book details successfully fetched for ID: {id}");
             return Ok(bookDetail);
         }
-
         #endregion
     }
 }
