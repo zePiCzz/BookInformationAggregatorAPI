@@ -1,6 +1,7 @@
 ﻿using BookInformationAggregatorAPI.Models;
 using BookInformationAggregatorAPI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using System.Net.Http;
 
 namespace BookInformationAggregatorAPI.Controllers
@@ -19,11 +20,29 @@ namespace BookInformationAggregatorAPI.Controllers
         #region Endpoints for Local Data
 
         // GET /books
-        // Returns all books
+        // Returns all books from the collection
         [HttpGet]
         public ActionResult<IEnumerable<Book>> GetAllBooks()
         {
-            return Ok(_bookService.GetAllBooks());
+            // Fetch all books from the service
+            var books = _bookService.GetAllBooks();
+
+            // Handle case where no books are found
+            if (!books.Any())
+            {
+                return NotFound(new
+                {
+                    message = "No books available in the collection.",
+                });
+            }
+
+            // Return the list of books with success message
+            return Ok(new
+            {
+                message = "Books retrieved successfully.",
+                count = books.Count(),
+                books = books
+            });
         }
 
         // POST /books
@@ -31,8 +50,54 @@ namespace BookInformationAggregatorAPI.Controllers
         [HttpPost]
         public IActionResult AddBook([FromBody] Book newBook)
         {
-            _bookService.AddBook(newBook);
-            return Created($"/books/{newBook.Id}", newBook);
+            try
+            {
+                // Validate the incoming book data
+                if (newBook == null)
+                {
+                    return BadRequest(new
+                    {
+                        message = "Invalid book data. The request body cannot be null.",
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(newBook.Id) ||
+                    string.IsNullOrWhiteSpace(newBook.Title) ||
+                    string.IsNullOrWhiteSpace(newBook.Author))
+                {
+                    return BadRequest(new
+                    {
+                        message = "Invalid book data. 'Id', 'Title', and 'Author' fields are required.",
+                    });
+                }
+
+                // Check if the book ID already exists
+                var existingBook = _bookService.GetAllBooks().FirstOrDefault(b => b.Id == newBook.Id);
+                if (existingBook != null)
+                {
+                    return Conflict(new
+                    {
+                        message = $"A book with ID '{newBook.Id}' already exists.",
+                    });
+                }
+
+                // Add the book to the collection
+                _bookService.AddBook(newBook);
+                return Created($"/books/{newBook.Id}", new
+                {
+                    message = "Book added successfully.",
+                    book = newBook
+                });
+            }
+            catch (Exception ex)
+            {
+                // General error handling
+                return StatusCode(500, new
+                {
+                    message = "An unexpected error occurred while adding the book.",
+                    errorDetails = ex.Message
+                });
+            }
         }
 
         // DELETE /books/{id}
@@ -40,12 +105,43 @@ namespace BookInformationAggregatorAPI.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteBook(string id)
         {
-            var result = _bookService.DeleteBook(id);
-            if (!result) return NotFound(new { message = "Book not found" });
+            try
+            {
+                // Validate the ID
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    return BadRequest(new
+                    {
+                        message = "Invalid ID. The book ID cannot be null or empty.",
+                    });
+                }
 
-            return NoContent();
+                // Attempt to delete the book
+                var result = _bookService.DeleteBook(id);
+                if (!result)
+                {
+                    return NotFound(new
+                    {
+                        message = $"Book with ID '{id}' not found.",
+                    });
+                }
+
+                // Return success response
+                return Ok(new
+                {
+                    message = $"Book with ID '{id}' has been successfully deleted."
+                });
+            }
+            catch (Exception ex)
+            {
+                // General error handling
+                return StatusCode(500, new
+                {
+                    message = "An unexpected error occurred while deleting the book.",
+                    errorDetails = ex.Message
+                });
+            }
         }
-
         #endregion
 
         #region Endpoints for External API Operations

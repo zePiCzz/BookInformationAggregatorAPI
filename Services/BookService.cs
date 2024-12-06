@@ -18,14 +18,36 @@ namespace BookInformationAggregatorAPI.Services
         // Initializes the BookService by loading data from books.json
         public BookService()
         {
-            if (File.Exists(_filePath))
+            try
             {
-                var json = File.ReadAllText(_filePath);
-                _books = JsonSerializer.Deserialize<List<Book>>(json) ?? new List<Book>();
+                if (File.Exists(_filePath))
+                {
+                    var json = File.ReadAllText(_filePath);
+
+                    // Attempt to deserialize the JSON data
+                    _books = JsonSerializer.Deserialize<List<Book>>(json) ?? new List<Book>();
+                }
+                else
+                {
+                    // Handle missing file scenario
+                    _books = new List<Book>();
+                    throw new FileNotFoundException($"The file '{_filePath}' does not exist.");
+                }
             }
-            else
+            catch (FileNotFoundException ex)
             {
-                _books = new List<Book>();
+                // Log the error and provide a user-friendly message
+                throw new Exception($"Books data file not found: {ex.Message}.");
+            }
+            catch (JsonException ex)
+            {
+                // Handle JSON parsing errors
+                throw new Exception($"Failed to parse the books.json file. Ensure it contains valid JSON. Error: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                // Handle any unexpected errors
+                throw new Exception($"An unexpected error occurred while initializing the BookService: {ex.Message}");
             }
 
             _httpClient = new HttpClient();
