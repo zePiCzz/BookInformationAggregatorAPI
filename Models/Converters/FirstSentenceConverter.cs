@@ -10,7 +10,7 @@ namespace BookInformationAggregatorAPI.Models.Converters
         {
             if (reader.TokenType == JsonTokenType.StartObject)
             {
-                // If first_sentence is an object, parse the "value" field
+                // If first_sentence is an object parse the value
                 using (var jsonDoc = JsonDocument.ParseValue(ref reader))
                 {
                     if (jsonDoc.RootElement.TryGetProperty("value", out var valueProp))
@@ -25,7 +25,6 @@ namespace BookInformationAggregatorAPI.Models.Converters
                 return reader.GetString();
             }
 
-            // Default return value if the field is missing or invalid
             return "No first sentence available.";
         }
 
