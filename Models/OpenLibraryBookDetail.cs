@@ -33,6 +33,9 @@ namespace BookInformationAggregatorAPI.Models
         [JsonPropertyName("subjects")]
         public List<string> Subjects { get; set; }
 
+        [JsonPropertyName("subject_times")]
+        public List<string> SubjectTimes { get; set; }
+
         [JsonPropertyName("first_sentence")]
         [JsonConverter(typeof(FirstSentenceConverter))]
         public string FirstSentence { get; set; }

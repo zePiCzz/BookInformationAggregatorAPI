@@ -151,10 +151,13 @@ namespace BookInformationAggregatorAPI.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<BookSearch>>> SearchBooks([FromQuery] string query)
         {
+            // Validate query parameter
             if (string.IsNullOrEmpty(query))
                 return BadRequest(new { message = "Query parameter is required" });
 
-            var books = await _bookService.SearchBooksAsync(query);
+            // Fetch search results
+            var books = await _bookService.SearchBooks(query);
+
             return Ok(books);
         }
 
@@ -163,17 +166,13 @@ namespace BookInformationAggregatorAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<OpenLibraryBookDetail>> GetBookDetails(string id)
         {
-            Console.WriteLine($"Fetching book details for ID: {id}");
+            // Fetch book details by ID
+            var bookDetail = await _bookService.GetOpenLibraryBookDetail(id);
 
-            var bookDetail = await _bookService.GetOpenLibraryBookDetailAsync(id);
-
+            // Return 404 if not found
             if (bookDetail == null)
-            {
-                Console.WriteLine($"Book details not found for ID: {id}");
                 return NotFound(new { message = $"Book with ID {id} not found." });
-            }
 
-            Console.WriteLine($"Book details successfully fetched for ID: {id}");
             return Ok(bookDetail);
         }
         #endregion

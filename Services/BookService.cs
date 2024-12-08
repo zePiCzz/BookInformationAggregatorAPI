@@ -95,13 +95,16 @@ namespace BookInformationAggregatorAPI.Services
         #region External API Operations
 
         // Searches for books by title or author from the Open Library API
-        public async Task<IEnumerable<BookSearch>> SearchBooksAsync(string query)
+        public async Task<IEnumerable<BookSearch>> SearchBooks(string query)
         {
+            // Build the search URL
             var url = $"https://openlibrary.org/search.json?q={Uri.EscapeDataString(query)}";
-            var response = await _httpClient.GetStringAsync(url);
 
+            // Fetch response and deserialize into model
+            var response = await _httpClient.GetStringAsync(url);
             var searchResult = JsonSerializer.Deserialize<OpenLibrarySearchResponse>(response);
 
+            // Map the search results to a simpler format
             return searchResult?.Docs.Select(d => new BookSearch
             {
                 Id = d.Key.Replace("/works/", ""),
@@ -113,67 +116,29 @@ namespace BookInformationAggregatorAPI.Services
         }
 
         // Fetches detailed information about a book by its Open Library ID (key)
-        public async Task<OpenLibraryBookDetail?> GetOpenLibraryBookDetailAsync(string id)
+        public async Task<OpenLibraryBookDetail?> GetOpenLibraryBookDetail(string id)
         {
             try
             {
-                // Try fetching details from /works/{id}
+                // Build the work URL
                 var workUrl = $"https://openlibrary.org/works/{id}.json";
-                Console.WriteLine($"Attempting to fetch work details for ID: {id} from {workUrl}");
 
-                var workResponse = await _httpClient.GetAsync(workUrl);
+                // Fetch response from the Open Library API
+                var response = await _httpClient.GetAsync(workUrl);
 
-                if (workResponse.IsSuccessStatusCode)
+                // Return null if the response is not successful
+                if (!response.IsSuccessStatusCode) return null;
+
+                // Deserialize response into model
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<OpenLibraryBookDetail>(content, new JsonSerializerOptions
                 {
-                    var workContent = await workResponse.Content.ReadAsStringAsync();
-                    var workDetail = JsonSerializer.Deserialize<OpenLibraryBookDetail>(workContent, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    if (workDetail != null)
-                    {
-                        Console.WriteLine($"Work details fetched successfully for ID: {id}");
-                        return workDetail;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"Work ID not found: {id}. Status Code: {workResponse.StatusCode}");
-                }
-
-                // If not found in /works, try /books
-                var bookUrl = $"https://openlibrary.org/books/{id}.json";
-                Console.WriteLine($"Attempting to fetch book details for ID: {id} from {bookUrl}");
-
-                var bookResponse = await _httpClient.GetAsync(bookUrl);
-
-                if (bookResponse.IsSuccessStatusCode)
-                {
-                    var bookContent = await bookResponse.Content.ReadAsStringAsync();
-                    var bookDetail = JsonSerializer.Deserialize<OpenLibraryBookDetail>(bookContent, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    if (bookDetail != null)
-                    {
-                        Console.WriteLine($"Book details fetched successfully for ID: {id}");
-                        return bookDetail;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"Book ID not found: {id}. Status Code: {bookResponse.StatusCode}");
-                }
-
-                // If neither works nor books endpoint has the data
-                Console.WriteLine($"Details for ID {id} not found in either works or books endpoint.");
-                return null;
+                    PropertyNameCaseInsensitive = true
+                });
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error fetching book details for ID {id}: {ex.Message}");
+                // Return null for any unexpected errors
                 return null;
             }
         }
