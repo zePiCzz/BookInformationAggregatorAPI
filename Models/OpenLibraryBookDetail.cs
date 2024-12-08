@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using BookInformationAggregatorAPI.Models.Converters;
 using System.Text.Json.Serialization;
 
 namespace BookInformationAggregatorAPI.Models
@@ -15,7 +15,8 @@ namespace BookInformationAggregatorAPI.Models
         public string FirstPublishDate { get; set; }
 
         [JsonPropertyName("description")]
-        public OpenLibraryDescription Description { get; set; }
+        [JsonConverter(typeof(DescriptionConverter))]
+        public string Description { get; set; }
 
         [JsonPropertyName("authors")]
         public List<OpenLibraryAuthor> Authors { get; set; }
@@ -33,13 +34,8 @@ namespace BookInformationAggregatorAPI.Models
         public List<string> Subjects { get; set; }
 
         [JsonPropertyName("first_sentence")]
-        public OpenLibraryFirstSentence FirstSentence { get; set; }
-    }
-
-    public class OpenLibraryDescription
-    {
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
+        [JsonConverter(typeof(FirstSentenceConverter))]
+        public string FirstSentence { get; set; }
     }
 
     public class OpenLibraryAuthor
@@ -52,11 +48,5 @@ namespace BookInformationAggregatorAPI.Models
     {
         [JsonPropertyName("key")]
         public string Key { get; set; }
-    }
-
-    public class OpenLibraryFirstSentence
-    {
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
     }
 }

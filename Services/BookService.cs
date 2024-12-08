@@ -117,9 +117,9 @@ namespace BookInformationAggregatorAPI.Services
         {
             try
             {
-                // Fetch details from /works/{id}
+                // Try fetching details from /works/{id}
                 var workUrl = $"https://openlibrary.org/works/{id}.json";
-                Console.WriteLine($"Fetching work details for ID: {id} from {workUrl}");
+                Console.WriteLine($"Attempting to fetch work details for ID: {id} from {workUrl}");
 
                 var workResponse = await _httpClient.GetAsync(workUrl);
 
@@ -133,18 +133,42 @@ namespace BookInformationAggregatorAPI.Services
 
                     if (workDetail != null)
                     {
-                        // Handle missing or partial data
-                        workDetail.Title ??= "Title not available";
-                        workDetail.Description ??= new OpenLibraryDescription { Value = "No description available" };
-                        workDetail.Authors ??= new List<OpenLibraryAuthor>();
+                        Console.WriteLine($"Work details fetched successfully for ID: {id}");
                         return workDetail;
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to fetch work details for ID: {id}. Status Code: {workResponse.StatusCode}");
+                    Console.WriteLine($"Work ID not found: {id}. Status Code: {workResponse.StatusCode}");
                 }
 
+                // If not found in /works, try /books
+                var bookUrl = $"https://openlibrary.org/books/{id}.json";
+                Console.WriteLine($"Attempting to fetch book details for ID: {id} from {bookUrl}");
+
+                var bookResponse = await _httpClient.GetAsync(bookUrl);
+
+                if (bookResponse.IsSuccessStatusCode)
+                {
+                    var bookContent = await bookResponse.Content.ReadAsStringAsync();
+                    var bookDetail = JsonSerializer.Deserialize<OpenLibraryBookDetail>(bookContent, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    if (bookDetail != null)
+                    {
+                        Console.WriteLine($"Book details fetched successfully for ID: {id}");
+                        return bookDetail;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Book ID not found: {id}. Status Code: {bookResponse.StatusCode}");
+                }
+
+                // If neither works nor books endpoint has the data
+                Console.WriteLine($"Details for ID {id} not found in either works or books endpoint.");
                 return null;
             }
             catch (Exception ex)
