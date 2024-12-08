@@ -111,7 +111,8 @@ namespace BookInformationAggregatorAPI.Services
                 Title = d.Title,
                 Author = d.Author,
                 FirstPublishYear = d.FirstPublishYear,
-                EditionKeys = d.EditionKeys
+                FirstSentence = d.FirstSentence,
+                Format = d.Format
             }) ?? Enumerable.Empty<OpenLibraryBook>();
         }
 

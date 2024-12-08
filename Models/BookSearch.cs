@@ -22,8 +22,11 @@ namespace BookInformationAggregatorAPI.Models
         [JsonPropertyName("first_publish_year")]
         public int? FirstPublishYear { get; set; }
 
-        [JsonPropertyName("edition_key")]
-        public List<string> EditionKeys { get; set; }
+        [JsonPropertyName("first_sentence")]
+        public IEnumerable<string> FirstSentence { get; set; }
+
+        [JsonPropertyName("format")]
+        public IEnumerable<string> Format { get; set; }
 
     }
 }
