@@ -14,7 +14,7 @@ namespace BookInformationAggregatorAPI.Models.Converters
             }
             else if (reader.TokenType == JsonTokenType.StartObject)
             {
-                // If the description is an object, try to parse its "value" property.
+                // If the description is an object, parse its value property.
                 using (var jsonDoc = JsonDocument.ParseValue(ref reader))
                 {
                     if (jsonDoc.RootElement.TryGetProperty("value", out var valueProp))
@@ -24,13 +24,11 @@ namespace BookInformationAggregatorAPI.Models.Converters
                 }
             }
 
-            // Return a default description if none is available.
             return "No description available.";
         }
 
         public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
         {
-            // Write the description back as a string.
             writer.WriteStringValue(value);
         }
     }

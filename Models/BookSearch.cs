@@ -1,11 +1,29 @@
-﻿namespace BookInformationAggregatorAPI.Models
+﻿using System.Text.Json.Serialization;
+
+namespace BookInformationAggregatorAPI.Models
 {
     public class BookSearch
     {
-        public string Id { get; set; }
+        [JsonPropertyName("docs")]
+        public IEnumerable<OpenLibraryBook> Docs { get; set; }
+    }
+
+    public class OpenLibraryBook
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; }
+
+        [JsonPropertyName("title")]
         public string Title { get; set; }
-        public string Author { get; set; }
-        public int PublishedYear { get; set; }
+
+        [JsonPropertyName("author_name")]
+        public IEnumerable<string> Author { get; set; }
+
+        [JsonPropertyName("first_publish_year")]
+        public int? FirstPublishYear { get; set; }
+
+        [JsonPropertyName("edition_key")]
         public List<string> EditionKeys { get; set; }
+
     }
 }

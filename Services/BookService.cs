@@ -95,28 +95,28 @@ namespace BookInformationAggregatorAPI.Services
         #region External API Operations
 
         // Searches for books by title or author from the Open Library API
-        public async Task<IEnumerable<BookSearch>> SearchBooks(string query)
+        public async Task<IEnumerable<OpenLibraryBook>> SearchBooks(string query)
         {
             // Build the search URL
             var url = $"https://openlibrary.org/search.json?q={Uri.EscapeDataString(query)}";
 
             // Fetch response and deserialize into model
             var response = await _httpClient.GetStringAsync(url);
-            var searchResult = JsonSerializer.Deserialize<OpenLibrarySearchResponse>(response);
+            var searchResult = JsonSerializer.Deserialize<BookSearch>(response);
 
             // Map the search results to a simpler format
-            return searchResult?.Docs.Select(d => new BookSearch
+            return searchResult?.Docs.Select(d => new OpenLibraryBook
             {
-                Id = d.Key.Replace("/works/", ""),
+                Key = d.Key.Replace("/works/", ""),
                 Title = d.Title,
-                Author = string.Join(", ", d.AuthorName ?? Array.Empty<string>()),
-                PublishedYear = d.FirstPublishYear ?? 0,
+                Author = d.Author,
+                FirstPublishYear = d.FirstPublishYear,
                 EditionKeys = d.EditionKeys
-            }) ?? Enumerable.Empty<BookSearch>();
+            }) ?? Enumerable.Empty<OpenLibraryBook>();
         }
 
         // Fetches detailed information about a book by its Open Library ID (key)
-        public async Task<OpenLibraryBookDetail?> GetOpenLibraryBookDetail(string id)
+        public async Task<BookDetails?> GetOpenLibraryBookDetail(string id)
         {
             try
             {
@@ -131,7 +131,7 @@ namespace BookInformationAggregatorAPI.Services
 
                 // Deserialize response into model
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<OpenLibraryBookDetail>(content, new JsonSerializerOptions
+                return JsonSerializer.Deserialize<BookDetails>(content, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });

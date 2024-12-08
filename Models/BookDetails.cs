@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace BookInformationAggregatorAPI.Models
 {
-    public class OpenLibraryBookDetail
+    public class BookDetails
     {
         [JsonPropertyName("key")]
         public string Key { get; set; }

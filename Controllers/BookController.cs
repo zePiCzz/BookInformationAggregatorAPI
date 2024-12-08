@@ -61,6 +61,7 @@ namespace BookInformationAggregatorAPI.Controllers
                     });
                 }
 
+                // Validate required fields
                 if (string.IsNullOrWhiteSpace(newBook.Id) ||
                     string.IsNullOrWhiteSpace(newBook.Title) ||
                     string.IsNullOrWhiteSpace(newBook.Author))
@@ -126,7 +127,7 @@ namespace BookInformationAggregatorAPI.Controllers
                     });
                 }
 
-                // Return success response
+                // Return success response if book is deleted
                 return Ok(new
                 {
                     message = $"Book with ID '{id}' has been successfully deleted."
@@ -151,7 +152,7 @@ namespace BookInformationAggregatorAPI.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<BookSearch>>> SearchBooks([FromQuery] string query)
         {
-            // Validate query parameter
+            // Check if query string is provided
             if (string.IsNullOrEmpty(query))
                 return BadRequest(new { message = "Query parameter is required" });
 
@@ -164,7 +165,7 @@ namespace BookInformationAggregatorAPI.Controllers
         // GET /books/{id}
         // Fetches detailed information about a book by its Open Library ID
         [HttpGet("{id}")]
-        public async Task<ActionResult<OpenLibraryBookDetail>> GetBookDetails(string id)
+        public async Task<ActionResult<BookDetails>> GetBookDetails(string id)
         {
             // Fetch book details by ID
             var bookDetail = await _bookService.GetOpenLibraryBookDetail(id);
@@ -178,3 +179,4 @@ namespace BookInformationAggregatorAPI.Controllers
         #endregion
     }
 }
+    
